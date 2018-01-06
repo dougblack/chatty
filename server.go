@@ -74,8 +74,10 @@ func (s *Server) Start() {
 			go s.handle(session)
 		case message := <-s.NewMessages:
 			for _, session := range s.Sessions {
-				session.Conn.Write([]byte(message.Body))
-				session.Conn.Write([]byte("\n"))
+				if session.User != message.User {
+					msg := fmt.Sprintf("%s: %s\n", message.User, message.Body)
+					session.Conn.Write([]byte(msg))
+				}
 			}
 		}
 	}
