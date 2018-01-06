@@ -25,6 +25,7 @@ type Message struct {
 	Body string
 }
 
+// Create a new chat server on the specified port.
 func NewServer(port int) (*Server, error) {
 	if port > 0 {
 		return &Server{
@@ -56,8 +57,14 @@ func (s *Server) welcome(conn net.Conn) (session *Session) {
 	}
 }
 
+// Start the server.
+//
+// This will both accept new connections and listen for
+// messages from existing connections and broadcast messages
+// to all other connections.
 func (s *Server) Start() {
-	addr, _ := net.ResolveTCPAddr("tcp", ":8080")
+	portString := fmt.Sprintf(":%d", s.Port)
+	addr, _ := net.ResolveTCPAddr("tcp", portString)
 	ln, err := net.ListenTCP("tcp", addr)
 	s.Listener = ln
 	if err != nil {
@@ -83,7 +90,11 @@ func (s *Server) Start() {
 	}
 }
 
+// Shutdown the server.
 func (s *Server) Stop() {
+	for _, session := range s.Sessions {
+		session.Conn.Close()
+	}
 	s.Listener.Close()
 }
 
