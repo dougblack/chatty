@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dougblack/chat"
+	"github.com/dougblack/chatty"
 )
 
 func main() {

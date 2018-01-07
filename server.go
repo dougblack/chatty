@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-type Session struct {
-	User string
-	Conn net.Conn
-}
-
 type Server struct {
 	Sessions    map[string]*Session
 	Port        int
 	Listener    *net.TCPListener
 	NewMessages chan *Message
 	NewSessions chan *Session
+}
+
+type Session struct {
+	User string
+	Conn *net.TCPConn
 }
 
 type Message struct {
@@ -38,7 +38,14 @@ func NewServer(port int) (*Server, error) {
 	return nil, errors.New("Invalid port")
 }
 
-func (s *Server) welcome(conn net.Conn) {
+func NewSession(user string, conn *net.TCPConn) *Session {
+	return &Session{
+		User: user,
+		Conn: conn,
+	}
+}
+
+func (s *Server) welcome(conn *net.TCPConn) {
 	welcomeMessage := fmt.Sprintf("Total users: %d\nusername: ", len(s.Sessions))
 	conn.Write([]byte(welcomeMessage))
 
@@ -51,11 +58,7 @@ func (s *Server) welcome(conn net.Conn) {
 			break
 		}
 	}
-	session := &Session{
-		User: username,
-		Conn: conn,
-	}
-	s.NewSessions <- session
+	s.NewSessions <- NewSession(username, conn)
 }
 
 // Start the server.
