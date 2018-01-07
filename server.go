@@ -45,6 +45,13 @@ func NewSession(user string, conn *net.TCPConn) *Session {
 	}
 }
 
+func NewMessage(user string, body string) *Message {
+	return &Message{
+		User: user,
+		Body: body,
+	}
+}
+
 func (s *Server) welcome(conn *net.TCPConn) {
 	welcomeMessage := fmt.Sprintf("Total users: %d\nusername: ", len(s.Sessions))
 	conn.Write([]byte(welcomeMessage))
@@ -59,6 +66,7 @@ func (s *Server) welcome(conn *net.TCPConn) {
 		}
 	}
 	s.NewSessions <- NewSession(username, conn)
+	s.NewMessages <- NewMessage("SYSTEM", fmt.Sprintf("%s has joined the server", username))
 }
 
 // Start the server.
@@ -129,12 +137,6 @@ func (s *Server) handle(session *Session) {
 				break
 			}
 		}
-
-		message := &Message{
-			User: session.User,
-			Body: body,
-		}
-
-		s.NewMessages <- message
+		s.NewMessages <- NewMessage(session.User, body)
 	}
 }

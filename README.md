@@ -2,6 +2,10 @@
 
 A local chat server in Go.
 
+### Example
+
+![Screenshot](./screen.png)
+
 ### Overview
 
 Working on chatty was a nice, small introduction to working with goroutines, channels, and TCP sockets in Go.
