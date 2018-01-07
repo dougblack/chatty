@@ -8,9 +8,11 @@ A local chat server in Go.
 
 ### Overview
 
-Working on chatty was a nice, small introduction to working with goroutines, channels, and TCP sockets in Go.
+Working on chatty was a nice, small introduction to working with goroutines,
+channels, and TCP sockets in Go.
 
-Peering at the program structs gives us a good idea how the program is structured.
+Peering at the struct definitions gives us a good idea how the application is
+structured.
 
 ```go
 type Server struct {
