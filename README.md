@@ -23,7 +23,7 @@ type Server struct {
 
 type Session struct {
 	User string
-	Conn net.Conn
+	Conn *net.TCPConn
 }
 
 type Message struct {
