@@ -38,7 +38,7 @@ func NewServer(port int) (*Server, error) {
 	return nil, errors.New("Invalid port")
 }
 
-func (s *Server) welcome(conn net.Conn) (session *Session) {
+func (s *Server) welcome(conn net.Conn) {
 	welcomeMessage := fmt.Sprintf("Total users: %d\nusername: ", len(s.Sessions))
 	conn.Write([]byte(welcomeMessage))
 
@@ -51,10 +51,11 @@ func (s *Server) welcome(conn net.Conn) (session *Session) {
 			break
 		}
 	}
-	return &Session{
+	session := &Session{
 		User: username,
 		Conn: conn,
 	}
+	s.NewSessions <- session
 }
 
 // Start the server.
@@ -80,6 +81,11 @@ func (s *Server) Start() {
 			s.Sessions[session.User] = session
 			go s.handle(session)
 		case message := <-s.NewMessages:
+			if message.Body == "/exit" {
+				s.Sessions[message.User].Conn.Close()
+				delete(s.Sessions, message.User)
+				break
+			}
 			for _, session := range s.Sessions {
 				if session.User != message.User {
 					msg := fmt.Sprintf("%s: %s\n", message.User, message.Body)
@@ -104,9 +110,8 @@ func (s *Server) listen() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Accepted new connection, RemoteAddr: %s\n", conn.RemoteAddr().String())
-		session := s.welcome(conn)
-		s.NewSessions <- session
+		fmt.Printf("New connection: %s\n", conn.RemoteAddr().String())
+		go s.welcome(conn)
 	}
 }
 
